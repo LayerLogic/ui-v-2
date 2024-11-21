@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <script type="module" src="main.js"></script>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -26,7 +27,6 @@
       }
 
       .right-panel {
-        flex-grow: 1;
         min-width: 0; /* Allows the panel to shrink below its content width */
         height: calc(100vh - 40px); /* Full height minus padding */
         position: relative;
@@ -39,9 +39,12 @@
       }
 
       .chart-container {
-        width: 100%;
+        width: 50%;
         height: 100%;
         position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
 
       textarea {
@@ -83,6 +86,11 @@
         background-color: #f8f8f8;
         font-size: 12px;
         margin: 0;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
 
       /* Make the chart responsive */
@@ -131,20 +139,31 @@
   </head>
   <body>
     <div class="left-panel">
-      <h1>Gate Analysis</h1>
-
       <div class="sweep-controls">
+        <h1>Gate Analysis</h1>
         <div class="input-group">
           <label>Step Size:</label>
           <input type="number" id="stepSize" value="0.03" step="0.01" />
         </div>
         <div class="input-group">
           <label>Vg Min:</label>
-          <input type="number" id="vgMin" value="-1" step="0.1" />
+          <input type="number" id="vgMin" value="-0.4" step="0.1" />
         </div>
         <div class="input-group">
           <label>Vg Max:</label>
-          <input type="number" id="vgMax" value="1" step="0.1" />
+          <input type="number" id="vgMax" value="0.4" step="0.1" />
+        </div>
+      </div>
+
+      <div class="sweep-controls">
+        <h1>Time Analysis</h1>
+        <div class="input-group">
+          <label>Gate V:</label>
+          <input type="number" id="gateV" value="1.2" step="0.1" />
+        </div>
+        <div class="input-group">
+          <label>Delay:</label>
+          <input type="number" id="delay" value="500" step="1" />
         </div>
       </div>
 
@@ -161,6 +180,7 @@ ACset, 1.1, 210, 3, 550</textarea
         <button id="resetZoomButton">Reset Zoom</button>
         <button id="sendCommandsButton">Start Sending Commands</button>
         <button id="startGateAnalysisButton">Start Gate Analysis</button>
+        <button id="startTimeAnalysisButton">Start Time Analysis</button>
         <button id="stopButton">Stop</button>
         <button id="clearChartButton">Clear Chart</button>
         <button id="saveDataButton">Save Data</button>
@@ -170,468 +190,370 @@ ACset, 1.1, 210, 3, 550</textarea
     <div class="right-panel">
       <div class="chart-container">
         <canvas id="myChart"></canvas>
+        <canvas id="myChart2"></canvas>
       </div>
     </div>
 
-    <script>
-      // Serial port and communication variables
-      let port;
-      let reader;
-      let writer;
-      const consoleElement = document.getElementById("console");
-      let isGateAnalysisRunning = false;
-      let currentGateAnalysisValue = 0.0;
-      let gateAnalysisResolver = null;
-      const summary = [];
+    <script type="module">
+      // import { log } from "./utils.js";
+      // import { createGateChartConfig } from "./chartsConfig.js";
 
-      // Chart data arrays
-      let chartData = {
-        vgValues: [],
-        r1Values: [],
-        r2Values: [],
-      };
+      // let port;
+      // let reader;
+      // let writer;
+      // let isGateAnalysisRunning = false;
+      // let currentGateAnalysisValue = 0.0;
+      // let gateAnalysisResolver = null;
+      // let isIncreasing = false;
+      // const summary = [];
 
-      let stepSize = 0.03;
-      let vgMin = -0.2;
-      let vgMax = 0.2;
+      // // Chart data arrays
+      // let chartData = {
+      //   vgValues: [],
+      //   r1Values: [],
+      //   r2Values: [],
+      // };
 
-      // Input handlers
-      document.getElementById("stepSize").addEventListener("change", (e) => {
-        stepSize = Math.abs(parseFloat(e.target.value)) || 0.03;
-        e.target.value = stepSize;
-      });
+      // let stepSize = 0.03;
+      // let vgMin = -0.2;
+      // let vgMax = 0.2;
 
-      document.getElementById("vgMin").addEventListener("change", (e) => {
-        vgMin = parseFloat(e.target.value) || -1;
-        e.target.value = vgMin;
+      // // Input handlers
+      // document.getElementById("stepSize").addEventListener("change", (e) => {
+      //   stepSize = Math.abs(parseFloat(e.target.value)) || 0.03;
+      //   e.target.value = stepSize;
+      // });
 
-        // Update the annotation
-        myChart.options.plugins.annotation.annotations.vgminLine.xMin = vgMin;
-        myChart.options.plugins.annotation.annotations.vgminLine.xMax = vgMin;
-        myChart.options.plugins.annotation.annotations.vgminLine.label.content = `Vg min: ${vgMin}`;
-        myChart.update();
-      });
+      // document.getElementById("vgMin").addEventListener("change", (e) => {
+      //   vgMin = parseFloat(e.target.value) || -1;
+      //   e.target.value = vgMin;
 
-      document.getElementById("vgMax").addEventListener("change", (e) => {
-        vgMax = parseFloat(e.target.value) || 1;
-        e.target.value = vgMax;
-      });
+      //   // Update the annotation
+      //   myChart.options.plugins.annotation.annotations.vgminLine.xMin = vgMin;
+      //   myChart.options.plugins.annotation.annotations.vgminLine.xMax = vgMin;
+      //   myChart.options.plugins.annotation.annotations.vgminLine.label.content = `Vg min: ${vgMin}`;
+      //   myChart.update();
+      // });
+
+      // document.getElementById("vgMax").addEventListener("change", (e) => {
+      //   vgMax = parseFloat(e.target.value) || 1;
+      //   e.target.value = vgMax;
+      // });
 
       // Modify the Start Gate Analysis function
-      document
-        .getElementById("startGateAnalysisButton")
-        .addEventListener("click", async () => {
-          if (!port || !writer) {
-            log("Please connect to serial port first!", "error");
-            return;
-          }
+      // document
+      //   .getElementById("startGateAnalysisButton")
+      //   .addEventListener("click", async () => {
+      //     if (!port || !writer) {
+      //       log("Please connect to serial port first!", "error");
+      //       return;
+      //     }
 
-          if (isGateAnalysisRunning) {
-            log("Gate analysis is already running!", "error");
-            return;
-          }
+      //     if (isGateAnalysisRunning) {
+      //       log("Gate analysis is already running!", "error");
+      //       return;
+      //     }
 
-          // Clear existing data
-          chartData = {
-            vgValues: [],
-            r1Values: [],
-            r2Values: [],
-          };
+      //     // Clear existing data
+      //     chartData = {
+      //       vgValues: [],
+      //       r1Values: [],
+      //       r2Values: [],
+      //     };
 
-          // Clear chart
-          myChart.data.labels = [];
-          myChart.data.datasets[0].data = [];
-          myChart.data.datasets[1].data = [];
-          myChart.update();
+      //     // Clear chart
+      //     myChart.data.labels = [];
+      //     myChart.data.datasets[0].data = [];
+      //     myChart.data.datasets[1].data = [];
+      //     myChart.update();
 
-          isGateAnalysisRunning = true;
-          isIncreasing = true;
+      //     isGateAnalysisRunning = true;
+      //     isIncreasing = true;
 
-          try {
-            while (isGateAnalysisRunning) {
-              // Send current value
-              const command = `ACgn, ${currentGateAnalysisValue.toFixed(2)}`;
-              const commandWithNewline = command + "\n";
-              const encoder = new TextEncoder();
-              const data = encoder.encode(commandWithNewline);
+      //     try {
+      //       while (isGateAnalysisRunning) {
+      //         // Send current value
+      //         const command = `ACgn, ${currentGateAnalysisValue.toFixed(2)}`;
+      //         const commandWithNewline = command + "\n";
+      //         const encoder = new TextEncoder();
+      //         const data = encoder.encode(commandWithNewline);
 
-              await writer.write(data);
-              log(`Sent: ${command}`, "send");
+      //         await writer.write(data);
+      //         log(`Sent: ${command}`, "send");
 
-              await new Promise((resolve) => {
-                gateAnalysisResolver = resolve;
-              });
+      //         await new Promise((resolve) => {
+      //           gateAnalysisResolver = resolve;
+      //         });
 
-              // Calculate next value based on direction
-              if (isIncreasing) {
-                currentGateAnalysisValue += stepSize;
-                if (currentGateAnalysisValue >= vgMax) {
-                  isIncreasing = false;
-                  log("Reached Vg Max, bouncing back", "info");
-                }
-              } else {
-                currentGateAnalysisValue -= stepSize;
-                if (currentGateAnalysisValue <= vgMin) {
-                  isIncreasing = true;
-                  log("Reached Vg Min, bouncing back", "info");
-                }
-              }
-            }
-          } catch (error) {
-            log(`Gate Analysis error: ${error}`, "error");
-          } finally {
-            isGateAnalysisRunning = false;
-          }
-        });
+      //         // Calculate next value based on direction
+      //         if (isIncreasing) {
+      //           currentGateAnalysisValue += stepSize;
+      //           if (currentGateAnalysisValue >= vgMax) {
+      //             isIncreasing = false;
+      //             log("Reached Vg Max, bouncing back", "info");
+      //           }
+      //         } else {
+      //           currentGateAnalysisValue -= stepSize;
+      //           if (currentGateAnalysisValue <= vgMin) {
+      //             isIncreasing = true;
+      //             log("Reached Vg Min, bouncing back", "info");
+      //           }
+      //         }
+      //       }
+      //     } catch (error) {
+      //       log(`Gate Analysis error: ${error}`, "error");
+      //     } finally {
+      //       isGateAnalysisRunning = false;
+      //     }
+      //   });
 
-      // Logging function
-      function log(message, type = "info") {
-        const logEntry = document.createElement("div");
-        logEntry.textContent = `[${type}] ${message}`;
-        logEntry.style.color =
-          type === "error" ? "red" : type === "success" ? "green" : "black";
-        consoleElement.appendChild(logEntry);
-        consoleElement.scrollTop = consoleElement.scrollHeight;
-      }
+      // // Parse response data and update chart
+      // function parseResponseAndUpdateChart(response, vgValue) {
+      //   const values = response.split(",").map((v) => parseFloat(v.trim()));
+      //   const x_gain = values[0];
+      //   const y_gain = values[1];
+      //   const current_AC = values[2];
+      //   const frequency = values[3];
+      //   const resistance_left = x_gain / current_AC;
+      //   const resistance_right = y_gain / current_AC;
+      //   const res = {};
+      //   res["Vg"] = vgValue;
+      //   res["X"] = x_gain;
+      //   res["Y"] = y_gain;
+      //   res["I"] = current_AC;
+      //   res["F"] = frequency;
+      //   summary.push(res);
 
-      // Parse response data and update chart
-      function parseResponseAndUpdateChart(response, vgValue) {
-        const values = response.split(",").map((v) => parseFloat(v.trim()));
-        const x_gain = values[0];
-        const y_gain = values[1];
-        const current_AC = values[2];
-        const frequency = values[3];
-        const resistance_left = x_gain / current_AC;
-        const resistance_right = y_gain / current_AC;
-        const res = {};
-        res["Vg"] = vgValue;
-        res["X"] = x_gain;
-        res["Y"] = y_gain;
-        res["I"] = current_AC;
-        res["F"] = frequency;
-        summary.push(res);
+      //   if (values.length >= 2) {
+      //     // Simply append new values to arrays
+      //     chartData.vgValues.push(vgValue.toFixed(2));
+      //     chartData.r1Values.push(resistance_left);
+      //     chartData.r2Values.push(resistance_right);
 
-        if (values.length >= 2) {
-          // Simply append new values to arrays
-          chartData.vgValues.push(vgValue.toFixed(2));
-          chartData.r1Values.push(resistance_left);
-          chartData.r2Values.push(resistance_right);
+      //     // Update chart with all data
+      //     myChart.data.labels = chartData.vgValues;
+      //     myChart.data.datasets[0].data = chartData.r1Values;
+      //     myChart.data.datasets[1].data = chartData.r2Values;
+      //     myChart.update();
+      //   }
+      // }
 
-          // Update chart with all data
-          myChart.data.labels = chartData.vgValues;
-          myChart.data.datasets[0].data = chartData.r1Values;
-          myChart.data.datasets[1].data = chartData.r2Values;
-          myChart.update();
-        }
-      }
+      // const annotation = {
+      //   type: "line",
+      //   xMin: vgMin, // Use vgMin instead of 0
+      //   xMax: vgMin, // Use vgMin instead of 0
+      //   borderColor: "blue",
+      //   borderWidth: 2,
+      //   borderDash: [5, 5],
+      //   label: {
+      //     content: `Vg min: ${vgMin}`,
+      //     enabled: true,
+      //     position: "top",
+      //   },
+      // };
 
-      const annotation = {
-        type: "line",
-        xMin: vgMin, // Use vgMin instead of 0
-        xMax: vgMin, // Use vgMin instead of 0
-        borderColor: "blue",
-        borderWidth: 2,
-        borderDash: [5, 5],
-        label: {
-          content: `Vg min: ${vgMin}`,
-          enabled: true,
-          position: "top",
-        },
-      };
+      // // Chart.register(ChartAnnotation);
+      // // Chart.js initialization with dual y-axes
+      // // const ctx = document.getElementById("myChart").getContext("2d");
+      // // const myChart = new Chart(ctx, createGateChartConfig());
 
-      // Chart.register(ChartAnnotation);
-      // Chart.js initialization with dual y-axes
-      const ctx = document.getElementById("myChart").getContext("2d");
-      const myChart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: "R (kΩ)",
-              data: [],
-              borderColor: "rgba(0, 0, 255, 1)",
-              borderWidth: 2,
-              fill: false,
-              yAxisID: "y",
-            },
-            {
-              label: "R (kΩ)",
-              data: [],
-              borderColor: "rgba(255, 0, 0, 1)",
-              borderWidth: 2,
-              fill: false,
-              yAxisID: "y1",
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false, // Allow the chart to fill its container
-          interaction: {
-            mode: "index",
-            intersect: false,
-          },
-          plugins: {
-            zoom: {
-              zoom: {
-                wheel: { enabled: true },
-                pinch: { enabled: true },
-                mode: "xy",
-              },
-            },
-            tooltip: {
-              usePointStyle: true,
-            },
-          },
-          scales: {
-            x: {
-              type: "linear",
-              title: {
-                display: true,
-                text: "Vg",
-                font: {
-                  size: 14,
-                  weight: "bold",
-                },
-              },
-              stacked: true,
-            },
-            y: {
-              type: "linear",
-              display: true,
-              position: "left",
-              stacked: true,
-              title: {
-                display: true,
-                text: "R (kΩ)",
-                font: {
-                  size: 14,
-                  weight: "bold",
-                },
-              },
-              grid: {
-                drawOnChartArea: false,
-              },
-            },
-            y1: {
-              type: "linear",
-              display: true,
-              position: "right",
-              stacked: true,
-              title: {
-                display: true,
-                text: "R (kΩ)",
-                font: {
-                  size: 14,
-                  weight: "bold",
-                },
-              },
-              grid: {
-                drawOnChartArea: false,
-              },
-            },
-          },
-        },
-      });
+      // // Reset Zoom button
+      // document
+      //   .getElementById("resetZoomButton")
+      //   .addEventListener("click", () => {
+      //     myChart.resetZoom();
+      //   });
 
-      // Reset Zoom button
-      document
-        .getElementById("resetZoomButton")
-        .addEventListener("click", () => {
-          myChart.resetZoom();
-        });
+      // // Clear Chart button
+      // document
+      //   .getElementById("clearChartButton")
+      //   .addEventListener("click", () => {
+      //     chartData = {
+      //       vgValues: [],
+      //       r1Values: [],
+      //       r2Values: [],
+      //     };
+      //     myChart.data.labels = [];
+      //     myChart.data.datasets[0].data = [];
+      //     myChart.data.datasets[1].data = [];
+      //     myChart.update();
+      //     log("Chart cleared", "info");
+      //   });
 
-      // Clear Chart button
-      document
-        .getElementById("clearChartButton")
-        .addEventListener("click", () => {
-          chartData = {
-            vgValues: [],
-            r1Values: [],
-            r2Values: [],
-          };
-          myChart.data.labels = [];
-          myChart.data.datasets[0].data = [];
-          myChart.data.datasets[1].data = [];
-          myChart.update();
-          log("Chart cleared", "info");
-        });
+      // // Connect to Serial Port
+      // document
+      //   .getElementById("connectButton")
+      //   .addEventListener("click", async () => {
+      //     try {
+      //       port = await navigator.serial.requestPort();
+      //       await port.open({ baudRate: 115200 });
+      //       log("Connected to Serial Port!", "success");
 
-      // Connect to Serial Port
-      document
-        .getElementById("connectButton")
-        .addEventListener("click", async () => {
-          try {
-            port = await navigator.serial.requestPort();
-            await port.open({ baudRate: 115200 });
-            log("Connected to Serial Port!", "success");
+      //       const textDecoder = new TextDecoderStream();
+      //       const readableStreamClosed = port.readable.pipeTo(
+      //         textDecoder.writable
+      //       );
+      //       reader = textDecoder.readable.getReader();
+      //       writer = port.writable.getWriter();
 
-            const textDecoder = new TextDecoderStream();
-            const readableStreamClosed = port.readable.pipeTo(
-              textDecoder.writable
-            );
-            reader = textDecoder.readable.getReader();
-            writer = port.writable.getWriter();
+      //       readSerialData();
+      //     } catch (error) {
+      //       log(`Error connecting: ${error}`, "error");
+      //     }
+      //   });
 
-            readSerialData();
-          } catch (error) {
-            log(`Error connecting: ${error}`, "error");
-          }
-        });
+      // // Read Serial Data
+      // async function readSerialData() {
+      //   let receivedBuffer = "";
 
-      // Read Serial Data
-      async function readSerialData() {
-        let receivedBuffer = "";
+      //   try {
+      //     while (true) {
+      //       const { value, done } = await reader.read();
+      //       if (done) break;
+      //       if (value) {
+      //         receivedBuffer += value;
 
-        try {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            if (value) {
-              receivedBuffer += value;
+      //         const lines = receivedBuffer.split("\n");
 
-              const lines = receivedBuffer.split("\n");
+      //         while (lines.length > 1) {
+      //           const line = lines.shift().trim();
+      //           if (line) {
+      //             log(`Received: ${line}`, "info");
 
-              while (lines.length > 1) {
-                const line = lines.shift().trim();
-                if (line) {
-                  log(`Received: ${line}`, "info");
+      //             if (isGateAnalysisRunning && gateAnalysisResolver) {
+      //               parseResponseAndUpdateChart(line, currentGateAnalysisValue);
+      //               gateAnalysisResolver(line);
+      //               gateAnalysisResolver = null;
+      //             }
+      //           }
+      //         }
 
-                  if (isGateAnalysisRunning && gateAnalysisResolver) {
-                    parseResponseAndUpdateChart(line, currentGateAnalysisValue);
-                    gateAnalysisResolver(line);
-                    gateAnalysisResolver = null;
-                  }
-                }
-              }
+      //         receivedBuffer = lines[0];
+      //       }
+      //     }
+      //   } catch (error) {
+      //     log(`Read error: ${error}`, "error");
+      //   }
+      // }
 
-              receivedBuffer = lines[0];
-            }
-          }
-        } catch (error) {
-          log(`Read error: ${error}`, "error");
-        }
-      }
+      // // Send Commands Sequentially
+      // document
+      //   .getElementById("sendCommandsButton")
+      //   .addEventListener("click", async () => {
+      //     if (!port || !writer) {
+      //       log("Please connect to serial port first!", "error");
+      //       return;
+      //     }
 
-      // Send Commands Sequentially
-      document
-        .getElementById("sendCommandsButton")
-        .addEventListener("click", async () => {
-          if (!port || !writer) {
-            log("Please connect to serial port first!", "error");
-            return;
-          }
+      //     const commands = document
+      //       .getElementById("commandsTextArea")
+      //       .value.trim()
+      //       .split("\n");
 
-          const commands = document
-            .getElementById("commandsTextArea")
-            .value.trim()
-            .split("\n");
+      //     try {
+      //       for (const command of commands) {
+      //         const commandWithNewline = command.trim() + "\n";
+      //         const encoder = new TextEncoder();
+      //         const data = encoder.encode(commandWithNewline);
 
-          try {
-            for (const command of commands) {
-              const commandWithNewline = command.trim() + "\n";
-              const encoder = new TextEncoder();
-              const data = encoder.encode(commandWithNewline);
+      //         await writer.write(data);
+      //         log(`Sent: ${command}`, "send");
 
-              await writer.write(data);
-              log(`Sent: ${command}`, "send");
+      //         await new Promise((resolve) => setTimeout(resolve, 500));
+      //       }
+      //     } catch (error) {
+      //       log(`Send error: ${error}`, "error");
+      //     }
+      //   });
 
-              await new Promise((resolve) => setTimeout(resolve, 500));
-            }
-          } catch (error) {
-            log(`Send error: ${error}`, "error");
-          }
-        });
+      // // Stop Button
+      // document.getElementById("stopButton").addEventListener("click", () => {
+      //   if (isGateAnalysisRunning) {
+      //     isGateAnalysisRunning = false;
+      //     log("Gate Analysis Stopped", "info");
+      //   }
+      // });
 
-      // Stop Button
-      document.getElementById("stopButton").addEventListener("click", () => {
-        if (isGateAnalysisRunning) {
-          isGateAnalysisRunning = false;
-          log("Gate Analysis Stopped", "info");
-        }
-      });
+      // // Clean up on page unload
+      // window.addEventListener("beforeunload", async () => {
+      //   if (port) {
+      //     try {
+      //       if (reader) reader.releaseLock();
+      //       if (writer) writer.releaseLock();
+      //       await port.close();
+      //     } catch (error) {
+      //       console.error("Error closing port:", error);
+      //     }
+      //   }
+      // });
 
-      // Clean up on page unload
-      window.addEventListener("beforeunload", async () => {
-        if (port) {
-          try {
-            if (reader) reader.releaseLock();
-            if (writer) writer.releaseLock();
-            await port.close();
-          } catch (error) {
-            console.error("Error closing port:", error);
-          }
-        }
-      });
+      // function saveDataToTxt() {
+      //   if (chartData.vgValues.length === 0) {
+      //     log("No data to save!", "error");
+      //     return;
+      //   }
 
-      function saveDataToTxt() {
-        if (chartData.vgValues.length === 0) {
-          log("No data to save!", "error");
-          return;
-        }
+      //   // Create text content with consistent spacing
+      //   let textContent =
+      //     "Vg (V)\t\tX (mV)\t\t\tY (mV)\t\t\tI (uA)\t\t\tf (Hz)\n\n\n"; // Headers with tab separation
+      //   // textContent += "-".repeat(40) + "\n"; // Separator line
 
-        // Create text content with consistent spacing
-        let textContent =
-          "Vg (V)\t\tX (mV)\t\t\tY (mV)\t\t\tI (uA)\t\t\tf (Hz)\n\n\n"; // Headers with tab separation
-        // textContent += "-".repeat(40) + "\n"; // Separator line
+      //   // Add data rows with proper formatting
+      //   for (let i = 0; i < summary.length; i++) {
+      //     textContent += `${summary[i]["Vg"]}\t\t${summary[i]["X"].toFixed(
+      //       6
+      //     )}\t\t${summary[i]["Y"].toFixed(6)}\t\t${summary[i]["I"].toFixed(
+      //       6
+      //     )}\t\t${summary[i]["F"].toFixed(6)}\n`;
+      //   }
 
-        // Add data rows with proper formatting
-        for (let i = 0; i < summary.length; i++) {
-          textContent += `${summary[i]["Vg"]}\t\t${summary[i]["X"].toFixed(
-            6
-          )}\t\t${summary[i]["Y"].toFixed(6)}\t\t${summary[i]["I"].toFixed(
-            6
-          )}\t\t${summary[i]["F"].toFixed(6)}\n`;
-        }
+      //   // Add summary statistics
+      //   // textContent += "\nSummary Statistics:\n";
+      //   // textContent += "-".repeat(40) + "\n";
+      //   // textContent += `Total Points: ${chartData.vgValues.length}\n`;
+      //   // textContent += `Vg Range: ${Math.min(
+      //   //   ...chartData.vgValues
+      //   // )} to ${Math.max(...chartData.vgValues)}\n`;
+      //   // textContent += `R1 Range: ${Math.min(...chartData.r1Values).toFixed(
+      //   //   6
+      //   // )} to ${Math.max(...chartData.r1Values).toFixed(6)} kΩ\n`;
+      //   // textContent += `R2 Range: ${Math.min(...chartData.r2Values).toFixed(
+      //   //   6
+      //   // )} to ${Math.max(...chartData.r2Values).toFixed(6)} kΩ\n`;
 
-        // Add summary statistics
-        // textContent += "\nSummary Statistics:\n";
-        // textContent += "-".repeat(40) + "\n";
-        // textContent += `Total Points: ${chartData.vgValues.length}\n`;
-        // textContent += `Vg Range: ${Math.min(
-        //   ...chartData.vgValues
-        // )} to ${Math.max(...chartData.vgValues)}\n`;
-        // textContent += `R1 Range: ${Math.min(...chartData.r1Values).toFixed(
-        //   6
-        // )} to ${Math.max(...chartData.r1Values).toFixed(6)} kΩ\n`;
-        // textContent += `R2 Range: ${Math.min(...chartData.r2Values).toFixed(
-        //   6
-        // )} to ${Math.max(...chartData.r2Values).toFixed(6)} kΩ\n`;
+      //   // Create blob and download link
+      //   const blob = new Blob([textContent], {
+      //     type: "text/plain;charset=utf-8",
+      //   });
+      //   const link = document.createElement("a");
 
-        // Create blob and download link
-        const blob = new Blob([textContent], {
-          type: "text/plain;charset=utf-8",
-        });
-        const link = document.createElement("a");
+      //   // Create filename with timestamp
+      //   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      //   const filename = `gate_analysis_${timestamp}.txt`;
 
-        // Create filename with timestamp
-        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-        const filename = `gate_analysis_${timestamp}.txt`;
+      //   // Trigger download
+      //   if (window.navigator.msSaveOrOpenBlob) {
+      //     // For IE
+      //     window.navigator.msSaveBlob(blob, filename);
+      //   } else {
+      //     // For other browsers
+      //     const url = window.URL.createObjectURL(blob);
+      //     link.href = url;
+      //     link.style.display = "none";
+      //     link.setAttribute("download", filename);
+      //     document.body.appendChild(link);
+      //     link.click();
+      //     document.body.removeChild(link);
+      //     window.URL.revokeObjectURL(url);
+      //   }
 
-        // Trigger download
-        if (window.navigator.msSaveOrOpenBlob) {
-          // For IE
-          window.navigator.msSaveBlob(blob, filename);
-        } else {
-          // For other browsers
-          const url = window.URL.createObjectURL(blob);
-          link.href = url;
-          link.style.display = "none";
-          link.setAttribute("download", filename);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-        }
-
-        log(`Data saved as ${filename}`, "success");
-      }
+      //   log(`Data saved as ${filename}`, "success");
+      // }
 
       // Update the click event listener for the save button
-      document
-        .getElementById("saveDataButton")
-        .addEventListener("click", saveDataToTxt);
+      // document
+      //   .getElementById("saveDataButton")
+      //   .addEventListener("click", saveDataToTxt);
     </script>
   </body>
 </html>
