@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function save() {
     if (gateAnalysis.isRunning) {
       saveGateToTxt(gateAnalysis.get_summary(), "Gate_analysis");
-    } else if (timeAnalysis.isRunning) {
+    } else {
       saveTimeToTxt(timeAnalysis.get_summary(), "Time_analysis");
     }
   }
