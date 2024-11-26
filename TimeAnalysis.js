@@ -9,11 +9,12 @@ export class TimeAnalysis {
 
     this.vg = vg;
     this.delay = delay;
+    this.summary = [];
   }
 
   parseResponse(response) {
     const values = response.split(",").map((v) => parseFloat(v.trim()));
-    const [x_gain, y_gain, current_AC, _] = values;
+    const [x_gain, y_gain, current_AC, frequency] = values;
 
     const resistance_left = x_gain / current_AC;
     const resistance_right = y_gain / current_AC;
@@ -24,7 +25,7 @@ export class TimeAnalysis {
       x_gain,
       y_gain,
       current_AC,
-      _,
+      frequency,
     };
   }
 
@@ -78,7 +79,21 @@ export class TimeAnalysis {
         const res = await this.serialComm.read();
         const elapsedTime = (Date.now() - this.timestamp) / 1000;
         log(res, "Received");
-        const { resistance_left, resistance_right } = this.parseResponse(res);
+        const {
+          resistance_left,
+          resistance_right,
+          x_gain,
+          y_gain,
+          current_AC,
+          frequency,
+        } = this.parseResponse(res);
+        this.summary.push({
+          t: elapsedTime.toFixed(2),
+          X: x_gain,
+          Y: y_gain,
+          I: current_AC,
+          F: frequency,
+        });
         this.updateChart(
           elapsedTime.toFixed(2),
           resistance_left,
@@ -91,6 +106,7 @@ export class TimeAnalysis {
   }
 
   reset() {
+    this.summary = [];
     this.chart.data.labels = [];
     this.chart.data.datasets[0].data = [];
     this.chart.data.datasets[1].data = [];
@@ -102,5 +118,9 @@ export class TimeAnalysis {
       this.isRunning = false;
       log("Time Analysis Stopped", "info");
     }
+  }
+
+  get_summary() {
+    return this.summary;
   }
 }

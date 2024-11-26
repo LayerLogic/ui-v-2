@@ -1,4 +1,4 @@
-import { log, saveDataToTxt, sleep } from "./utils.js";
+import { log, saveGateToTxt, saveTimeToTxt, sleep } from "./utils.js";
 import { gateChartConfig, timeChartConfig } from "./chartsConfig.js";
 import { SerialCommunication } from "./SerialCommunication.js";
 import { GateAnalysis } from "./GateAnalysis.js";
@@ -120,7 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function save() {
-    saveDataToTxt(gateAnalysis.get_summary(), "Gate_analysis");
+    if (gateAnalysis.isRunning) {
+      saveGateToTxt(gateAnalysis.get_summary(), "Gate_analysis");
+    } else if (timeAnalysis.isRunning) {
+      saveTimeToTxt(timeAnalysis.get_summary(), "Time_analysis");
+    }
   }
 
   document.getElementById("saveDataButton").addEventListener("click", save);
