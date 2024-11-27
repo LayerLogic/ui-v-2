@@ -120,10 +120,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function save() {
-    if (gateAnalysis.isRunning) {
-      saveGateToTxt(gateAnalysis.get_summary(), "Gate_analysis");
-    } else if (timeAnalysis.isRunning) {
-      saveTimeToTxt(timeAnalysis.get_summary(), "Time_analysis");
+    const gateSummary = gateAnalysis.get_summary();
+    const timeSummary = timeAnalysis.get_summary();
+    if (gateSummary.length > 0) {
+      saveGateToTxt(gateSummary, "Gate_analysis");
+    } else if (timeSummary.length > 0) {
+      saveTimeToTxt(timeSummary, "Time_analysis");
     }
   }
 

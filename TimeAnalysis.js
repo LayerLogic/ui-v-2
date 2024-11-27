@@ -49,11 +49,24 @@ export class TimeAnalysis {
     log(initialCommand, "sent");
     const initialRes = await this.serialComm.read();
     log(initialRes, "Received");
-    const { resistance_left, resistance_right } =
-      this.parseResponse(initialRes);
+    const {
+      resistance_left,
+      resistance_right,
+      x_gain,
+      y_gain,
+      current_AC,
+      frequency,
+    } = this.parseResponse(initialRes);
 
     // Plot the initial point at t=0
     this.updateChart("0.00", resistance_left, resistance_right);
+    this.summary.push({
+      t: 0.0,
+      X: x_gain,
+      Y: y_gain,
+      I: current_AC,
+      F: frequency,
+    });
 
     // this.reset();
     this.isRunning = true;
@@ -88,7 +101,7 @@ export class TimeAnalysis {
           frequency,
         } = this.parseResponse(res);
         this.summary.push({
-          t: elapsedTime.toFixed(2),
+          t: elapsedTime,
           X: x_gain,
           Y: y_gain,
           I: current_AC,
