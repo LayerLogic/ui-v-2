@@ -11,7 +11,7 @@ export const gateChartConfig = () => ({
         fill: false,
         yAxisID: "y",
         pointStyle: "circle", // Add this line
-        pointRadius: 5, // Optional: controls point size
+        pointRadius: 1, // Optional: controls point size
         pointHoverRadius: 8,
       },
       {
@@ -21,8 +21,8 @@ export const gateChartConfig = () => ({
         borderWidth: 2,
         fill: false,
         yAxisID: "y1",
-        pointStyle: "triangle", // Add this line
-        pointRadius: 5, // Optional: controls point size
+        pointStyle: "circle", // Add this line
+        pointRadius: 1, // Optional: controls point size
         pointHoverRadius: 8,
       },
     ],
@@ -110,7 +110,7 @@ export const timeChartConfig = () => ({
         fill: false,
         yAxisID: "y",
         pointStyle: "circle", // Add this line
-        pointRadius: 5, // Optional: controls point size
+        pointRadius: 1, // Optional: controls point size
         pointHoverRadius: 8,
       },
       {
@@ -120,8 +120,8 @@ export const timeChartConfig = () => ({
         borderWidth: 2,
         fill: false,
         yAxisID: "y1",
-        pointStyle: "triangle", // Add this line
-        pointRadius: 5, // Optional: controls point size
+        pointStyle: "circle", // Add this line
+        pointRadius: 1, // Optional: controls point size
         pointHoverRadius: 8,
       },
     ],

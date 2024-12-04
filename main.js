@@ -17,6 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const gateChart = new Chart(ctx, gateChartConfig());
   const timeChart = new Chart(ctx2, timeChartConfig());
 
+  document.getElementById("myChart").style.display = "none";
+  document.getElementById("myChart2").style.display = "none";
+
   const serialComm = new SerialCommunication();
   const gateAnalysis = new GateAnalysis(
     serialComm,
@@ -40,14 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.getElementById("clearChartButton").addEventListener("click", () => {
-    if (gateAnalysis.isRunning) {
-      gateAnalysis.reset();
-    } else if (timeAnalysis.isRunning) {
-      timeAnalysis.reset();
-    }
-  });
-
   document.getElementById("stopButton").addEventListener("click", () => {
     if (gateAnalysis.isRunning) {
       gateAnalysis.stop();
@@ -61,6 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("startGateAnalysisButton")
     .addEventListener("click", () => {
+      document.getElementById("myChart").style.display = "block";
+      document.getElementById("myChart2").style.display = "none";
       gateAnalysis.start();
       document.getElementById("startTimeAnalysisButton").disabled = true;
     });
@@ -68,6 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("startTimeAnalysisButton")
     .addEventListener("click", () => {
+      document.getElementById("myChart").style.display = "none";
+      document.getElementById("myChart2").style.display = "block";
+      document.getElementById("myChart2").style.display = "100%";
       timeAnalysis.start();
       document.getElementById("startGateAnalysisButton").disabled = true;
     });
@@ -96,19 +96,38 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("vgMin").addEventListener("input", async (e) => {
-    const vgMin = parseFloat(e.target.value) || -1;
+    let vgMin;
+    if (e.target.value === "") {
+      vgMin = -0.5;
+    } else if (parseFloat(e.target.value) > 0) {
+      vgMin = -0.1;
+    } else {
+      vgMin = parseFloat(e.target.value);
+    }
     await sleep(500);
     gateAnalysis.vg_min = vgMin;
   });
 
   document.getElementById("vgMax").addEventListener("input", async (e) => {
-    const vgMax = parseFloat(e.target.value) || 1;
+    let vgMax;
+    if (e.target.value === "") {
+      vgMax = 0.5;
+    } else if (parseFloat(e.target.value) < 0) {
+      vgMax = 0.1;
+    } else {
+      vgMax = parseFloat(e.target.value);
+    }
     await sleep(500);
     gateAnalysis.vg_max = vgMax;
   });
 
   document.getElementById("gateV").addEventListener("input", async (e) => {
-    const vg = parseFloat(e.target.value) || 1;
+    let vg;
+    if (e.target.value === "") {
+      vg = 1;
+    } else {
+      vg = parseFloat(e.target.value);
+    }
     await sleep(500);
     timeAnalysis.vg = vg;
   });

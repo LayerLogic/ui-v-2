@@ -19,6 +19,10 @@ function color(type) {
   }
 }
 
+// ###############################
+// ##### CHANGE "." TO "," WHEN SAVING
+// ###############################
+
 export const saveGateToTxt = (data, file_name) => {
   if (data.length === 0) {
     log("No data to save!", "error");
