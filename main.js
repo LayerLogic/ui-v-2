@@ -5,11 +5,11 @@ import { GateAnalysis } from "./GateAnalysis.js";
 import { TimeAnalysis } from "./TimeAnalysis.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const vg = parseFloat(document.getElementById("gateV").value) || 0.03;
-  const delay = parseFloat(document.getElementById("delay").value) || 0;
-  const vgStep = parseFloat(document.getElementById("stepSize").value) || 0.03;
-  const vgMin = parseFloat(document.getElementById("vgMin").value) || -1;
-  const vgMax = parseFloat(document.getElementById("vgMax").value) || 1;
+  const vg = parseFloat(document.getElementById("gateV").value);
+  const delay = parseFloat(document.getElementById("delay").value);
+  const vgStep = parseFloat(document.getElementById("stepSize").value);
+  const vgMin = parseFloat(document.getElementById("vgMin").value);
+  const vgMax = parseFloat(document.getElementById("vgMax").value);
 
   const ctx = document.getElementById("myChart").getContext("2d");
   const ctx2 = document.getElementById("myChart2").getContext("2d");
@@ -97,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("vgMin").addEventListener("input", async (e) => {
     let vgMin;
+    log(e.target.value);
     if (e.target.value === "") {
       vgMin = -0.5;
     } else {
