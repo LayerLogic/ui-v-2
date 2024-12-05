@@ -19,42 +19,33 @@ function color(type) {
   }
 }
 
-// ###############################
-// ##### CHANGE "." TO "," WHEN SAVING
-// ###############################
-
 export const saveGateToTxt = (data, file_name) => {
   if (data.length === 0) {
     log("No data to save!", "error");
     return;
   }
 
-  // Create text content with consistent spacing
   let textContent = "Vg (V)\t\tX (mV)\t\tY (mV)\t\tI (uA)\t\tf (Hz)\n"; // Headers with tab separation
-  // textContent += "-".repeat(40) + "\n"; // Separator line
 
   // Add data rows with proper formatting
   for (let i = 0; i < data.length; i++) {
-    textContent += `${data[i]["Vg"].toFixed(2)}\t\t${data[i]["X"].toFixed(
-      6
-    )}\t\t${data[i]["Y"].toFixed(6)}\t\t${data[i]["I"].toFixed(6)}\t\t${data[i][
-      "F"
-    ].toFixed(6)}\n`;
+    textContent += `${data[i]["Vg"]
+      .toFixed(2)
+      .toString()
+      .replace(".", ",")}\t\t${data[i]["X"]
+      .toFixed(6)
+      .toString()
+      .replace(".", ",")}\t\t${data[i]["Y"]
+      .toFixed(6)
+      .toString()
+      .replace(".", ",")}\t\t${data[i]["I"]
+      .toFixed(6)
+      .toString()
+      .replace(".", ",")}\t\t${data[i]["F"]
+      .toFixed(6)
+      .toString()
+      .replace(".", ",")}\n`;
   }
-
-  // Add summary statistics
-  // textContent += "\nSummary Statistics:\n";
-  // textContent += "-".repeat(40) + "\n";
-  // textContent += `Total Points: ${chartData.vgValues.length}\n`;
-  // textContent += `Vg Range: ${Math.min(
-  //   ...chartData.vgValues
-  // )} to ${Math.max(...chartData.vgValues)}\n`;
-  // textContent += `R1 Range: ${Math.min(...chartData.r1Values).toFixed(
-  //   6
-  // )} to ${Math.max(...chartData.r1Values).toFixed(6)} kΩ\n`;
-  // textContent += `R2 Range: ${Math.min(...chartData.r2Values).toFixed(
-  //   6
-  // )} to ${Math.max(...chartData.r2Values).toFixed(6)} kΩ\n`;
 
   // Create blob and download link
   const blob = new Blob([textContent], {
@@ -96,26 +87,23 @@ export const saveTimeToTxt = (data, file_name) => {
 
   // Add data rows with proper formatting
   for (let i = 0; i < data.length; i++) {
-    textContent += `${data[i]["t"].toFixed(2)}\t\t${data[i]["X"].toFixed(
-      6
-    )}\t\t${data[i]["Y"].toFixed(6)}\t\t${data[i]["I"].toFixed(6)}\t\t${data[i][
-      "F"
-    ].toFixed(6)}\n`;
+    textContent += `${data[i]["t"]
+      .toFixed(2)
+      .toString()
+      .replace(".", ",")}\t\t${data[i]["X"]
+      .toFixed(6)
+      .toString()
+      .replace(".", ",")}\t\t${data[i]["Y"]
+      .toFixed(6)
+      .toString()
+      .replace(".", ",")}\t\t${data[i]["I"]
+      .toFixed(6)
+      .toString()
+      .replace(".", ",")}\t\t${data[i]["F"]
+      .toFixed(6)
+      .toString()
+      .replace(".", ",")}\n`;
   }
-
-  // Add summary statistics
-  // textContent += "\nSummary Statistics:\n";
-  // textContent += "-".repeat(40) + "\n";
-  // textContent += `Total Points: ${chartData.vgValues.length}\n`;
-  // textContent += `Vg Range: ${Math.min(
-  //   ...chartData.vgValues
-  // )} to ${Math.max(...chartData.vgValues)}\n`;
-  // textContent += `R1 Range: ${Math.min(...chartData.r1Values).toFixed(
-  //   6
-  // )} to ${Math.max(...chartData.r1Values).toFixed(6)} kΩ\n`;
-  // textContent += `R2 Range: ${Math.min(...chartData.r2Values).toFixed(
-  //   6
-  // )} to ${Math.max(...chartData.r2Values).toFixed(6)} kΩ\n`;
 
   // Create blob and download link
   const blob = new Blob([textContent], {
@@ -147,3 +135,25 @@ export const saveTimeToTxt = (data, file_name) => {
 };
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const parseResponse = (response) => {
+  if (!response) {
+    log("No response recieved.", "warning");
+    return;
+  }
+
+  const values = response.split(",").map((v) => parseFloat(v.trim()));
+  const [x_gain, y_gain, current_AC, frequency] = values;
+
+  const resistance_left = x_gain / current_AC;
+  const resistance_right = y_gain / current_AC;
+
+  return {
+    resistance_left,
+    resistance_right,
+    x_gain,
+    y_gain,
+    current_AC,
+    frequency,
+  };
+};

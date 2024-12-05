@@ -99,8 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let vgMin;
     if (e.target.value === "") {
       vgMin = -0.5;
-    } else if (parseFloat(e.target.value) > 0) {
-      vgMin = -0.1;
     } else {
       vgMin = parseFloat(e.target.value);
     }
@@ -112,8 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let vgMax;
     if (e.target.value === "") {
       vgMax = 0.5;
-    } else if (parseFloat(e.target.value) < 0) {
-      vgMax = 0.1;
     } else {
       vgMax = parseFloat(e.target.value);
     }

@@ -1,32 +1,14 @@
-import { log } from "./utils.js";
+import { log, parseResponse } from "./utils.js";
 
 export class TimeAnalysis {
   constructor(serialComm, chart, vg, delay) {
     this.serialComm = serialComm;
     this.chart = chart;
     this.isRunning = false;
-    this.timestamp = 0;
 
     this.vg = vg;
     this.delay = delay;
     this.summary = [];
-  }
-
-  parseResponse(response) {
-    const values = response.split(",").map((v) => parseFloat(v.trim()));
-    const [x_gain, y_gain, current_AC, frequency] = values;
-
-    const resistance_left = x_gain / current_AC;
-    const resistance_right = y_gain / current_AC;
-
-    return {
-      resistance_left,
-      resistance_right,
-      x_gain,
-      y_gain,
-      current_AC,
-      frequency,
-    };
   }
 
   updateChart(timestamp, res_left, res_right) {
@@ -56,19 +38,18 @@ export class TimeAnalysis {
       y_gain,
       current_AC,
       frequency,
-    } = this.parseResponse(initialRes);
+    } = parseResponse(initialRes);
 
     // Plot the initial point at t=0
     this.updateChart("0.00", resistance_left, resistance_right);
     this.summary.push({
-      t: 0.0,
+      t: 0,
       X: x_gain,
       Y: y_gain,
       I: current_AC,
       F: frequency,
     });
 
-    // this.reset();
     this.isRunning = true;
     this.timestamp = Date.now();
 
@@ -99,7 +80,7 @@ export class TimeAnalysis {
           y_gain,
           current_AC,
           frequency,
-        } = this.parseResponse(res);
+        } = parseResponse(res);
         this.summary.push({
           t: elapsedTime,
           X: x_gain,
@@ -116,14 +97,6 @@ export class TimeAnalysis {
     } catch (error) {
       log(`Time Analysis error: ${error}`, "error");
     }
-  }
-
-  reset() {
-    this.summary = [];
-    this.chart.data.labels = [];
-    this.chart.data.datasets[0].data = [];
-    this.chart.data.datasets[1].data = [];
-    this.chart.update();
   }
 
   stop() {
