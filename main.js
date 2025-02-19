@@ -145,7 +145,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  document.getElementById("saveDataButton").addEventListener("click", save);
+  function open_reuirements_file() {
+    window.open("requirements.txt", "_blank");
+  }
 
+  document.getElementById("saveDataButton").addEventListener("click", save);
+  document
+    .getElementById("infoCommandsButton")
+    .addEventListener("click", open_reuirements_file);
   window.addEventListener("beforeunload", () => serialComm.disconnect());
 });

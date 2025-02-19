@@ -15,13 +15,15 @@ export class GateAnalysis {
 
     this.summary = [];
   }
-
+  updateVgValue() {
+    this.vg = this.vg_min;
+  }
   async start() {
     if (this.isRunning) {
       log("Gate analysis is already running!", "error");
       return;
     }
-
+    this.vg = this.vg_min;
     this.isRunning = true;
     let isIncreasing = true;
 

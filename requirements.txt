@@ -1,0 +1,52 @@
+In the command string, the delimiter is ",". The spaces are ignored. The numerical values should be given within
+certain limits.
+
+"mg" ("mb") to measure once with the certain gate (bias) voltage.
+A string is sent out consisting of only Vout
+example: "mg, -1.2"; "mg, 2.3". The numerical value is limited to plus-minus 2.5.
+
+"mgn" ("mbn") returns an average of N measurements at a set Vg (Vb).
+A string is sent out consisting of only averaged Vout
+example: "mgn, -1.2, 10, 1"; "mgn, 2.3, 100, 1": i.e., three numbers are expected after "mgn": "mgn, Vg, N, delay".
+delay is in ms between consequitvie measurements and is different from "dt" below.  
+The numerical value is limited to plus-minus 2.5.
+
+"Rmg" sets Vg and returns one measurement of resistance R
+example: "Rmg, -1.2"; "Rmg, 2.3"
+
+"Rmgn" sets Vg and returns the average resistance R
+example: "Rmgn, -1.2, 10, 1"; "Rmg, 2.3, 5, 10"
+Three numbers are expected after "Rmgn": "mgn, Vg, N, delay".
+
+"s" to change the sample. A confirmation string is sent out.
+example: "s, 1" or "s, 2"
+
+"Vg" ("Vb") to change the gate (bias) voltage, no measurement.
+A confirmation string is sent out.
+example: "Vg, -1.2"; "Vg, 2.3". The numerical value is limited to plus-minus 2.5.
+
+"Vgm" ("Vbm") to change the gate (bias) voltage and measure Vout.
+A confirmation string is sent out, ending with "Vout = x.xxx"
+example: "Vg, -1.0"; "Vg, 1.3". The numerical value is limited to plus-minus 2.5.
+No gain correction.
+
+"dt" to change the delay time in ms between setting a voltage and measurements of Vout.
+example: "dt, 10"; "dt, 150".
+A confirmation string is sent out.
+
+"serR" to change the series resistance after changing the hardware switch
+example: "serR, 4"; "serR, 3".
+A confirmation string is sent out. 1,2,3,4 are the expected numbers. 3 is default.
+
+"gain" to change the amplifier gain
+example: "gain, 4"; "gain, 3".
+A confirmation string is sent out. 1-7 are the expected numbers. 3 is default.
+
+"ACset" to setup AC measurements, followed by biasV (between -+2.5), number of points in sinusoid (<300), number of sinusoid periods, and
+delay in us between consequitive AC measurements (1/frequency).
+example: "ACset, 1.1, 210, 3, 550", i.e., four numbers are expected after command string
+A confirmation string is sent out.
+
+"ACgn" returns X and Y components of AC response to AC bias (in mV). This to be followed by gate V, i.e., one number is expected after the command string.
+example: "ACgn,0.57". "ACset" must be run at least once before executing ACgn.  
+Returns X/gain [mV], Y/gain [mV], bias AC current [uA], and frequency of measurements (four numbers in total).
