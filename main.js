@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function open_reuirements_file() {
-    window.open("requirements.txt", "_blank");
+    window.open("https://layerlogic.github.io/ui/requirements.txt", "_blank");
   }
 
   document.getElementById("saveDataButton").addEventListener("click", save);
