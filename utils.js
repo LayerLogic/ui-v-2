@@ -14,6 +14,10 @@ function color(type) {
       return "red";
     case "success":
       return "green";
+    case "warning":
+      return "orange";
+    case "info":
+      return "blue";
     default:
       return "black";
   }
