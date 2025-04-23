@@ -1,7 +1,7 @@
-export const gateChartConfig = () => ({
+export const gateChartConfig = (sample) => ({
   type: "line",
   data: {
-    labels: [],
+    labels: ["Gate"],
     datasets: [
       {
         label: "R (kΩ)",
@@ -44,6 +44,14 @@ export const gateChartConfig = () => ({
       },
       tooltip: {
         usePointStyle: true,
+      },
+      title: {
+        display: true,
+        text: `Channel: ${sample}`,
+        font: {
+          size: 16,
+          weight: "bold",
+        },
       },
     },
     scales: {
@@ -97,7 +105,7 @@ export const gateChartConfig = () => ({
   },
 });
 
-export const timeChartConfig = () => ({
+export const timeChartConfig = (sample) => ({
   type: "line",
   data: {
     labels: [],
@@ -143,6 +151,14 @@ export const timeChartConfig = () => ({
       },
       tooltip: {
         usePointStyle: true,
+      },
+      title: {
+        display: true,
+        text: `Channel: ${sample}`,
+        font: {
+          size: 16,
+          weight: "bold",
+        },
       },
     },
     scales: {

@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const container = document.getElementById("chart-container");
       container.appendChild(canvas);
       const ctx = canvas.getContext("2d");
-      const gateChart = new Chart(ctx, gateChartConfig());
+      const gateChart = new Chart(ctx, gateChartConfig(sample));
 
       gateAnalysiss[sample] = new GateAnalysis(
         serialComm,
@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const container = document.getElementById("chart-container");
       container.appendChild(canvas);
       const ctx = canvas.getContext("2d");
-      const timeChart = new Chart(ctx, timeChartConfig());
+      const timeChart = new Chart(ctx, timeChartConfig(sample));
       timeAnalysiss[sample] = new TimeAnalysis(
         serialComm,
         sample,
