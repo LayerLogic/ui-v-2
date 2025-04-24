@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
   const sendCommandsButton = document.getElementById("sendCommandsButton");
   const saveDataButton = document.getElementById("saveDataButton");
+  const toggleGridButton = document.getElementById("toggleGrid");
   const infoCommandsButton = document.getElementById("infoCommandsButton");
   const commandsTextArea = document.getElementById("commandsTextArea");
   const stepSizeInput = document.getElementById("stepSize");
@@ -54,6 +55,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   /**** EVENT LISTENERS ****/
   // Connect to Arduino
   connectButton.addEventListener("click", () => serialComm.connect(true));
+  // disable the connect button if the connection is successful
+  if (serialComm.isConnected) {
+    connectButton.disabled = true;
+    connectButton.innerText = "Connected";
+  } else {
+    connectButton.disabled = false;
+    connectButton.innerText = "Connect";
+  }
 
   // Reset zoom for all charts
   resetZoomButton.addEventListener("click", () => {
@@ -73,6 +82,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Stop all analyses
   stopButton.addEventListener("click", () => {
     isRunning = false;
+  });
+
+  // Toggle grid change the       grid-template-columns: 1fr; to grid-template-columns: 1fr 1fr;
+  toggleGridButton.addEventListener("click", () => {
+    const container = document.getElementById("chart-container");
+    if (container.style.gridTemplateColumns === "1fr") {
+      container.style.gridTemplateColumns = "1fr 1fr";
+      toggleGridButton.innerText = "Grid";
+    } else {
+      container.style.gridTemplateColumns = "1fr";
+      toggleGridButton.innerText = "Single Column";
+    }
   });
 
   // Start Gate analyses

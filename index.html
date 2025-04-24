@@ -22,44 +22,12 @@
           <button id="connectButton">Connect</button>
         </div>
 
-        <div class="sweep-controls">
-          <h1>Gate Analysis</h1>
-          <div class="input-container">
-            <div class="input-group">
-              <label>Step Size:</label>
-              <input type="number" id="stepSize" value="0.03" step="0.01" />
-            </div>
-            <div class="input-group">
-              <label>Vg Min:</label>
-              <input type="number" id="vgMin" value="-0.2" step="0.1" />
-            </div>
-            <div class="input-group">
-              <label>Vg Max:</label>
-              <input type="number" id="vgMax" value="0.4" step="0.1" />
-            </div>
-          </div>
-        </div>
-
-        <div class="sweep-controls">
-          <h1>Time Analysis</h1>
-          <div class="input-container">
-            <div class="input-group">
-              <label>Gate V:</label>
-              <input type="number" id="gateV" value="0.0" step="0.1" />
-            </div>
-            <div class="input-group">
-              <label>Delay:</label>
-              <input type="number" id="delay" value="500" step="1" />
-            </div>
-          </div>
-        </div>
-
         <div class="commands-container">
           <div id="channels" class="channels-container">
-            <button id="1">Channel 1</button>
-            <button id="2">Channel 2</button>
-            <button id="3">Channel 3</button>
-            <button id="4">Channel 4</button>
+            <button id="1" class="secondary">Channel 1</button>
+            <button id="2" class="secondary">Channel 2</button>
+            <button id="3" class="secondary">Channel 3</button>
+            <button id="4" class="secondary">Channel 4</button>
           </div>
           <textarea name="Commands" id="commandsTextArea">
 ACset, 0.5, 200, 3, 1000</textarea
@@ -85,6 +53,40 @@ ACset, 0.5, 200, 3, 1000</textarea
             </div>
           </div>
         </div>
+
+        <div class="sweep-controls">
+          <h1>Gate Analysis</h1>
+          <div class="input-container">
+            <div class="input-group">
+              <label>Step Size:</label>
+              <input type="number" id="stepSize" value="0.03" step="0.01" />
+            </div>
+            <div class="input-group">
+              <label>Vg Min:</label>
+              <input type="number" id="vgMin" value="-0.2" step="0.1" />
+            </div>
+            <div class="input-group">
+              <label>Vg Max:</label>
+              <input type="number" id="vgMax" value="0.4" step="0.1" />
+            </div>
+            <button id="startGateAnalysisButton">Run gate analysis</button>
+          </div>
+        </div>
+
+        <div class="sweep-controls">
+          <h1>Time Analysis</h1>
+          <div class="input-container">
+            <div class="input-group">
+              <label>Gate V:</label>
+              <input type="number" id="gateV" value="0.0" step="0.1" />
+            </div>
+            <div class="input-group">
+              <label>Delay:</label>
+              <input type="number" id="delay" value="500" step="1" />
+            </div>
+            <button id="startTimeAnalysisButton">Run time analysis</button>
+          </div>
+        </div>
       </div>
 
       <div id="console"></div>
@@ -92,12 +94,9 @@ ACset, 0.5, 200, 3, 1000</textarea
 
     <div class="right-panel">
       <div class="chart-controller-container">
-        <div class="chart-controllers">
-          <button id="startGateAnalysisButton">Run gate analysis</button>
-          <button id="startTimeAnalysisButton">Run time analysis</button>
-          <button id="resetZoomButton" class="secondary">Reset zoom</button>
-        </div>
         <div class="button-container">
+          <button id="resetZoomButton" class="secondary">Reset zoom</button>
+          <button id="toggleGrid">Single Column</button>
           <button id="saveDataButton">Save</button>
           <button id="stopButton" class="secondary danger">Stop</button>
         </div>
@@ -155,6 +154,7 @@ ACset, 0.5, 200, 3, 1000</textarea
       padding: 16px;
       border: 1px solid #ccc;
       border-radius: 8px;
+      width: 100%;
     }
 
     .chart-controllers {
@@ -167,13 +167,23 @@ ACset, 0.5, 200, 3, 1000</textarea
     }
 
     .chart-container {
-      width: 50%;
+      width: 100%;
       height: 100%;
       position: relative;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr;
       gap: 16px;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .chart-container > canvas {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
     }
 
     textarea {
@@ -197,7 +207,7 @@ ACset, 0.5, 200, 3, 1000</textarea
     }
 
     .secondary {
-      background-color: transparent;
+      background-color: #e4e4e7;
       color: #0a0a0a;
       border: none;
     }
@@ -211,7 +221,7 @@ ACset, 0.5, 200, 3, 1000</textarea
     }
 
     .secondary:hover {
-      background-color: #e4e4e7;
+      background-color: #d4d4d8;
     }
 
     button:hover {
@@ -266,16 +276,6 @@ ACset, 0.5, 200, 3, 1000</textarea
       opacity: 0.6;
       cursor: not-allowed;
     }
-
-    /* Make the chart responsive */
-    /* canvas {
-        width: 100% !important;
-        height: 100% !important;
-      } */
-
-    /* .chart-container canvas {
-        display: none;
-      } */
 
     .controller-panel {
       display: flex;
