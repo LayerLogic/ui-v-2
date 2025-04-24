@@ -31,13 +31,17 @@ export class TimeAnalysis {
 
   async run() {
     try {
+      const sample = await this.serialComm.sendCommand(`s, ${this.sample}`);
+      log(sample, "Sent");
+      const commandRes = await this.serialComm.read();
+      log(commandRes, "Received");
       const command = await this.serialComm.sendCommand(
         `ACgn, ${this.vg.toFixed(2)}`
       );
       log(command, "sent");
       const res = await this.serialComm.read();
-      const elapsedTime = (Date.now() - this.timestamp) / 1000;
       log(res, "Received");
+      const elapsedTime = (Date.now() - this.timestamp) / 1000;
       const {
         resistance_left,
         resistance_right,

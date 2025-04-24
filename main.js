@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       log("Please select at least one channel", "error");
       return;
     }
+    console.log("channelsArr", channelsArr);
     for (const sample of channelsArr) {
       const canvas = document.createElement("canvas");
       canvas.id = sample;
@@ -127,14 +128,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         vgMax
       );
     }
+
+    console.log("gateAnalysiss", gateAnalysiss);
+
     startGateAnalysisButton.disabled = true;
     startTimeAnalysisButton.disabled = true;
 
     let index = 0;
     isRunning = true;
     while (isRunning) {
-      let current = (index % channelsArr.length) + 1;
-      const gateAnalysis = gateAnalysiss[current];
+      let currentIdx = index % channelsArr.length;
+      let channelName = channelsArr[currentIdx];
+      const gateAnalysis = gateAnalysiss[channelName];
+      console.log("gateAnalysis", index, currentIdx, gateAnalysis);
       await gateAnalysis.run();
       index++;
     }
@@ -152,6 +158,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       log("Please select at least one channel", "error");
       return;
     }
+    console.log("channelsArr", channelsArr);
+
     for (const sample of channelsArr) {
       const canvas = document.createElement("canvas");
       canvas.id = sample;
@@ -168,15 +176,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         delay
       );
     }
+    console.log("timeAnalysiss", timeAnalysiss);
+
     startGateAnalysisButton.disabled = true;
     startTimeAnalysisButton.disabled = true;
 
     let index = 0;
     isRunning = true;
+    let setup = false;
     while (isRunning) {
-      let current = (index % channelsArr.length) + 1;
-      const timeAnalysis = timeAnalysiss[current];
-      await timeAnalysis.setup();
+      let currentIdx = index % channelsArr.length;
+      let channelName = channelsArr[currentIdx];
+      const timeAnalysis = timeAnalysiss[channelName];
+      if (!setup) {
+        await timeAnalysis.setup();
+        setup = true;
+      }
       await timeAnalysis.run();
       index++;
     }
