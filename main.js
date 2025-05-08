@@ -109,7 +109,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       log("Please select at least one channel", "error");
       return;
     }
-    console.log("channelsArr", channelsArr);
     for (const sample of channelsArr) {
       const canvas = document.createElement("canvas");
       canvas.id = sample;
@@ -129,8 +128,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
     }
 
-    console.log("gateAnalysiss", gateAnalysiss);
-
     startGateAnalysisButton.disabled = true;
     startTimeAnalysisButton.disabled = true;
 
@@ -140,7 +137,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       let currentIdx = index % channelsArr.length;
       let channelName = channelsArr[currentIdx];
       const gateAnalysis = gateAnalysiss[channelName];
-      console.log("gateAnalysis", index, currentIdx, gateAnalysis);
       await gateAnalysis.run();
       index++;
     }
@@ -158,7 +154,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       log("Please select at least one channel", "error");
       return;
     }
-    console.log("channelsArr", channelsArr);
 
     for (const sample of channelsArr) {
       const canvas = document.createElement("canvas");
@@ -176,7 +171,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         delay
       );
     }
-    console.log("timeAnalysiss", timeAnalysiss);
 
     startGateAnalysisButton.disabled = true;
     startTimeAnalysisButton.disabled = true;

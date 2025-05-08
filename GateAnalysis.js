@@ -5,7 +5,7 @@ export class GateAnalysis {
     this.serialComm = serialComm;
     this.chart = chart;
 
-    this.vg = 0;
+    this.vg = vg_min || 0;
     this.vg_step = vg_step;
     this.vg_min = vg_min;
     this.vg_max = vg_max;
@@ -16,6 +16,7 @@ export class GateAnalysis {
   }
 
   async run() {
+    console.log("Running Gate Analysis", this.vg);
     try {
       const sample = await this.serialComm.sendCommand(`s, ${this.sample}`);
       log(sample, "Sent");
